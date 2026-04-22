@@ -15,6 +15,7 @@
   <modules>
     <module>discovery-server</module>
     <module>api-gateway</module>
+    <module>user-service</module>
   </modules>
 
   <!-- Spring Boot parent handles all version management -->
