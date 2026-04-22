@@ -10,7 +10,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List; // Import List
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -36,14 +38,20 @@ public class UserService {
                 .role(Role.READER) // Default role for new registrations
                 .build();
 
-        userRepository.save(user);
+        user = userRepository.save(user);
+
+        // Add extra claims
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("userId", user.getId());
+        extraClaims.put("role", user.getRole().getAuthority());
 
         // Generate JWT token
         String token = jwtService.generateToken(
+                extraClaims,
                 org.springframework.security.core.userdetails.User
                         .withUsername(user.getEmail())
                         .password(user.getPassword())
-                        .authorities(user.getRole().getAuthority()) // Use getAuthority() from Role enum
+                        .authorities(user.getRole().getAuthority())
                         .build()
         );
 
@@ -64,11 +72,17 @@ public class UserService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+        // Add extra claims
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("userId", user.getId());
+        extraClaims.put("role", user.getRole().getAuthority());
+
         String token = jwtService.generateToken(
+                extraClaims,
                 org.springframework.security.core.userdetails.User
                         .withUsername(user.getEmail())
                         .password(user.getPassword())
-                        .authorities(user.getRole().getAuthority()) // Use getAuthority() from Role enum
+                        .authorities(user.getRole().getAuthority())
                         .build()
         );
 
